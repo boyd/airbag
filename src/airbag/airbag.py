@@ -1,3 +1,4 @@
+import bdb
 import json
 import os
 import pprint
@@ -12,6 +13,22 @@ ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
 HTML_FILE_PATH = os.path.join(ROOT_PATH, "airbag.html")
 JS_FILE_PATH = os.path.join(ROOT_PATH, "airbag.js")
 
+
+class AirbagRunner(bdb.Bdb):
+  def _runscript(self, filename):
+    # The script has to run in __main__ namespace (or imports from
+    # __main__ will break).
+    #
+    # So we clear up the __main__ and set several special variables
+    # (this gets rid of pdb's globals and cleans old variables on restarts).
+    import __main__
+    __main__.__dict__.clear()
+    __main__.__dict__.update({"__name__"    : "__main__",
+                              "__file__"    : filename,
+                              "__builtins__": __builtins__,
+                             })
+    cmd = 'execfile(%r)' % filename
+    self.run(cmd)
 
 class ExceptionReporter(object):
   def __init__(self, exc_type, exc_value, tb):
@@ -53,6 +70,9 @@ class ExceptionReporter(object):
       var_strs[str(name)] = str(value)[:10000]
     return var_strs
 
+  def is_airbag_reset_point(self, tb_frame):
+      return isinstance(tb_frame.f_locals.get('self'), AirbagRunner)
+
   def get_traceback_frames(self):
     frames = []
     tb = self.tb
@@ -63,11 +83,16 @@ class ExceptionReporter(object):
         'lineno' : tb.tb_lineno - 1,
         'variables' : self._get_variables(tb.tb_frame),
       }
+
       source_code =  self._get_source_code(frame , 7)
 
       if source_code is not None:
         frame.update(source_code)
         frames.append(frame)
+
+      if self.is_airbag_reset_point(tb.tb_frame):
+        frames = []
+
       tb = tb.tb_next
 
     return frames

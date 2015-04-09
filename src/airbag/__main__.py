@@ -1,24 +1,7 @@
-import bdb
 import os.path
 import sys
 
-from .airbag import enable
-
-class AirbagRunner(bdb.Bdb):
-  def _runscript(self, filename):
-    # The script has to run in __main__ namespace (or imports from
-    # __main__ will break).
-    #
-    # So we clear up the __main__ and set several special variables
-    # (this gets rid of pdb's globals and cleans old variables on restarts).
-    import __main__
-    __main__.__dict__.clear()
-    __main__.__dict__.update({"__name__"    : "__main__",
-                              "__file__"    : filename,
-                              "__builtins__": __builtins__,
-                             })
-    cmd = 'execfile(%r)' % filename
-    self.run(cmd)
+from .airbag import enable, AirbagRunner
 
 
 def main():
