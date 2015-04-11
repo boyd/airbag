@@ -6,7 +6,7 @@ Handlebars.registerHelper('source_table', function(frame, options) {
     var className =  (lineno == frame.lineno) ? "traceline" : "normal";
 
     output.push("<tr class='" + className + "'><td class='lineno'>");
-    output.push(lineno + ".  </td><td><pre>" + frame.source_context[i] +"</pre></td></tr>");
+    output.push(lineno + 1 + ".  </td><td><pre>" + frame.source_context[i] +"</pre></td></tr>");
   }
 
   return output.join("");
