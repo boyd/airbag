@@ -1,7 +1,7 @@
 <html>
   <head>
     <style>
-      table { border: 0px; border-collapse: collapse; }
+      table { border: 0px; solid #ccc; border-collapse: collapse; background:white; }
       tr.traceline { background-color: yellow; }
       td.lineno { text-align:right; }
       li { padding-top: 10px; padding-bottom: 10px; }
@@ -12,6 +12,12 @@
   <h3>%(exc_type)s - %(exc_value)s</h3>
   <script id="crash-template" type="text/x-handlebars-template">
     <ol>
+      <h4>Environment</h4>
+      <table>
+        {{#variables_table this.environ}} {{/variables_table}}
+      </table>
+    </ol>
+    <ol>
     {{#frames}}
     <li><strong>{{ func_name }} in {{ filename }}</strong>
       <table>
@@ -19,7 +25,7 @@
       </table>
       <br />
       <table>
-        {{#variables_table this}} {{/variables_table}}
+        {{#variables_table this.variables}} {{/variables_table}}
       </table>
     </li>
     {{/frames}}
@@ -27,7 +33,7 @@
   </script>
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
   <script src="http://builds.handlebarsjs.com.s3.amazonaws.com/handlebars-v2.0.0.js"></script>
-  <script> var data = %(frames_json)s;
+  <script> var data = %(handlebar_data)s;
     %(inline_airbag_javascript)s;
   </script>
     

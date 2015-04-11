@@ -12,11 +12,11 @@ Handlebars.registerHelper('source_table', function(frame, options) {
   return output.join("");
 });
 
-Handlebars.registerHelper('variables_table', function(frame, options) {
+Handlebars.registerHelper('variables_table', function(variables, options) {
   var output = [];
-  for (var name in frame.variables) {
-    var value = frame.variables[name];
-    output.push("<tr><td>" +  name + "</td><td>" +  value + "</td></tr>");
+  for (var name in variables) {
+    var value = variables[name];
+    output.push("<tr><td>" +  name + "</td><td>=</td><td>" +  value + "</td></tr>");
   }
 
   return output.join("");

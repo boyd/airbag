@@ -37,10 +37,14 @@ class ExceptionReporter(object):
     self.tb = tb
 
   def get_template_context(self):
+    crash_data = dict(
+      frames=self.get_traceback_frames(),
+      environ=self.get_environ(),
+    )
     return {
-      'exc_type' : self.exc_type.__class__.__name__,
-      'exc_value' : self.exc_value,
-      'frames_json' : json.dumps(dict(frames=self.get_traceback_frames()), indent=4),
+      'exc_type': self.exc_type.__class__.__name__,
+      'exc_value': self.exc_value,
+      'handlebar_data': json.dumps(crash_data, indent=4),
     }
 
   def render_html(self):
@@ -64,11 +68,11 @@ class ExceptionReporter(object):
       'source_context' : source[lower_bound:upper_bound],
     }
 
-  def _get_variables(self, tb_frame):
-    var_strs = {}
-    for name, value in tb_frame.f_locals.items():
-      var_strs[str(name)] = str(value)[:10000]
-    return var_strs
+  def _get_renderable_dict(self, dictionary):
+    renderable_dict = {}
+    for name, value in dictionary.items():
+      renderable_dict [str(name)] = str(value)[:10000]
+    return renderable_dict
 
   def is_airbag_reset_point(self, tb_frame):
       return isinstance(tb_frame.f_locals.get('self'), AirbagRunner)
@@ -78,10 +82,10 @@ class ExceptionReporter(object):
     tb = self.tb
     while tb is not None:
       frame = {
-        'filename' : tb.tb_frame.f_code.co_filename,
-        'func_name' : tb.tb_frame.f_code.co_name,
-        'lineno' : tb.tb_lineno - 1,
-        'variables' : self._get_variables(tb.tb_frame),
+        'filename': tb.tb_frame.f_code.co_filename,
+        'func_name': tb.tb_frame.f_code.co_name,
+        'lineno': tb.tb_lineno - 1,
+        'variables': self._get_renderable_dict(tb.tb_frame.f_locals)
       }
 
       source_code =  self._get_source_code(frame , 7)
@@ -96,6 +100,9 @@ class ExceptionReporter(object):
       tb = tb.tb_next
 
     return frames
+
+  def get_environ(self):
+    return self._get_renderable_dict(os.environ)
 
 
 def generate_crash_report(exctype=None, value=None, tb=None):
