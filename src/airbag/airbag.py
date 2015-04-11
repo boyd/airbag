@@ -6,6 +6,7 @@ import sys
 import time
 import tempfile
 import traceback
+import types
 import webbrowser
 
 
@@ -71,7 +72,8 @@ class ExceptionReporter(object):
   def _get_renderable_dict(self, dictionary):
     renderable_dict = {}
     for name, value in dictionary.items():
-      renderable_dict [str(name)] = str(value)[:10000]
+      if not callable(value) and not isinstance(value, types.ModuleType):
+        renderable_dict [str(name)] = str(value)[:10000]
     return renderable_dict
 
   def is_airbag_reset_point(self, tb_frame):
