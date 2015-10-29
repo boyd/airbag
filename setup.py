@@ -7,7 +7,7 @@ ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__)))
 
 setup(
     name='airbag',
-    version='0.1'
+    version='0.1',
     author='Patrick Boyd',
     author_email='pat.m.you-can-guess@gmail.com',
     description='Python crash report tool',
